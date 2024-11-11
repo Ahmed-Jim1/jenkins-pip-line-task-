@@ -1,0 +1,18 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                // Replace the repository URL with your own
+                git url: 'https://github.com/Ahmed-Jim1/jenkins-pip-line-task-.git', branch: 'main'
+            }
+        }
+        stage('Run Bash Script') {
+            steps {
+                
+                sh './myscript.sh'
+            }
+        }
+    }
+}
