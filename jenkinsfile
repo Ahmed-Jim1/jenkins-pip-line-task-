@@ -4,16 +4,17 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                // Replace the repository URL with your own
+                // Clone the repository
                 git url: 'https://github.com/Ahmed-Jim1/jenkins-pip-line-task-.git', branch: 'main'
             }
         }
         stage('Run Bash Script') {
             steps {
-                script {
-                 sudo chmod +x 'myscript.sh'
-                 './myscript.sh'
-                    }
+                // Execute shell commands
+                sh '''
+                    chmod +x myscript.sh
+                    ./myscript.sh
+                '''
             }
         }
     }
