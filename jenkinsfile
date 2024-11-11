@@ -10,10 +10,10 @@ pipeline {
         }
         stage('Run Bash Script') {
             steps {
-                
+                script {
            sh  sudo chmod +x myscript.sh
                 sh './myscript.sh'
-                    
+                    }
             }
         }
     }
