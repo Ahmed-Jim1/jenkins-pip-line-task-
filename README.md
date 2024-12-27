@@ -1,46 +1,15 @@
 # Final Project: Infrastructure Automation and Deployment with CI/CD
 
 ## Table of Contents
-1. [Task 1: Containerization with Docker](#task-1-containerization-with-docker)
-2. [Task 2: Infrastructure Provisioning with Terraform](#task-2-infrastructure-provisioning-with-terraform)
+1. [Task 1: Infrastructure Provisioning with Terraform](#task-1-infrastructure-provisioning-with-terraform)
+2. [Task 2: Configuration Management with Ansible](#task-2-configuration-management-with-ansible)
 3. [Task 3: Jenkins Pipeline for CI/CD](#task-3-jenkins-pipeline-for-cicd)
-4. [Task 4: Ansible for Configuration Management](#task-4-ansible-for-configuration-management)
-5. [Task 5: Integrating Argo CD with AKS](#task-5-integrating-argo-cd-with-aks)
-6. [Conclusion](#conclusion)
+4. [Task 4: Deploying to AKS with Argo CD](#task-4-deploying-to-aks-with-argo-cd)
+5. [Conclusion](#conclusion)
 
 ---
 
-## Task 1: Containerization with Docker
-
-### Objective
-Containerize a Java application using Docker for easier deployment and scalability.
-
-### Steps
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Ibrahim-Adell/FinalProjectCode.git
-   cd FinalProjectCode
-   ```
-2. Build the Docker image:
-   ```bash
-   docker build -t my-java-app:latest .
-   ```
-3. Verify the Docker image:
-   ```bash
-   docker images
-   ```
-4. Run the container:
-   ```bash
-   docker run -d -p 8080:8080 my-java-app:latest
-   ```
-
-### Validation
-- **Command Outputs**: Screenshot of `docker images` and `docker ps` showing the running container.
-- **Application Access**: Screenshot of the application running on `http://localhost:8080`.
-
----
-
-## Task 2: Infrastructure Provisioning with Terraform
+## Task 1: Infrastructure Provisioning with Terraform
 
 ### Objective
 Provision AWS resources including VPC, subnets, security groups, and an EC2 instance using Terraform.
@@ -70,39 +39,7 @@ Provision AWS resources including VPC, subnets, security groups, and an EC2 inst
 
 ---
 
-## Task 3: Jenkins Pipeline for CI/CD
-
-### Objective
-Automate application build, testing, and deployment to AKS using Jenkins.
-
-### Steps
-1. Configure the Jenkins pipeline:
-   - Add the `Jenkinsfile` to your repository.
-   - Use shared libraries for reusable stages.
-2. Execute the pipeline in Jenkins.
-   ```groovy
-   pipeline {
-       stages {
-           stage('Checkout') { steps { checkout scm } }
-           stage('Build') { steps { sh 'docker build -t app-image .' } }
-           stage('Push') { steps { sh 'docker push your-docker-repo/app-image' } }
-           stage('Deploy') { steps { sh 'kubectl apply -f deployment.yaml' } }
-       }
-   }
-   ```
-3. Verify deployment in AKS:
-   ```bash
-   kubectl get pods
-   kubectl get services
-   ```
-
-### Validation
-- **Command Outputs**: Screenshots of Jenkins pipeline stages passing.
-- **AKS Deployment**: Screenshots of Kubernetes pods and services.
-
----
-
-## Task 4: Ansible for Configuration Management
+## Task 2: Configuration Management with Ansible
 
 ### Objective
 Configure EC2 instances for Jenkins, Docker, SonarQube, and Kubernetes CLI using Ansible.
@@ -133,7 +70,77 @@ Configure EC2 instances for Jenkins, Docker, SonarQube, and Kubernetes CLI using
 
 ---
 
-## Task 5: Integrating Argo CD with AKS
+## Task 3: Jenkins Pipeline for CI/CD
+
+### Objective
+Automate application build, testing, and deployment to AKS using Jenkins.
+
+### Steps
+#### Step 1: Set Up SonarQube with Jenkins
+1. Install the **SonarQube Scanner** plugin in Jenkins.
+2. Configure SonarQube Server:
+   - Navigate to **Manage Jenkins > Configure System > SonarQube Servers**.
+   - Add your SonarQube server details and token.
+3. Configure the SonarQube Scanner in **Global Tool Configuration**.
+4. Validate with a pipeline stage for SonarQube analysis:
+   ```groovy
+   stage('SonarQube Analysis') {
+       steps {
+           script {
+               withSonarQubeEnv('SonarQube') {
+                   sh 'mvn sonar:sonar'
+               }
+           }
+       }
+   }
+   ```
+5. **Validation**: Screenshot of SonarQube analysis results.
+
+#### Step 2: Configure Jenkins Shared Library
+1. Create a shared library structure:
+   ```plaintext
+   shared-library/
+       vars/
+           checkoutPipeline.groovy
+           dockerTasks.groovy
+           sonarQubeAnalysis.groovy
+           deployToKubernetes.groovy
+   ```
+2. Add reusable Groovy scripts for each pipeline stage.
+3. Configure the shared library in Jenkins:
+   - Go to **Manage Jenkins > Configure System > Global Pipeline Libraries**.
+   - Add your library name and Git repository URL.
+4. Reference the shared library in the Jenkinsfile:
+   ```groovy
+   @Library('shared-library@main') _
+   ```
+5. **Validation**: Screenshot of shared library configuration.
+
+#### Step 3: Execute the Jenkins Pipeline
+1. Define a complete pipeline in the `Jenkinsfile`:
+   ```groovy
+   pipeline {
+       agent any
+       stages {
+           stage('Checkout') { steps { checkout scm } }
+           stage('Build') { steps { sh 'docker build -t app-image .' } }
+           stage('SonarQube Analysis') { steps { script { withSonarQubeEnv('SonarQube') { sh 'mvn sonar:sonar' } } } }
+           stage('Push') { steps { sh 'docker push your-docker-repo/app-image' } }
+           stage('Deploy') { steps { sh 'kubectl apply -f deployment.yaml' } }
+       }
+   }
+   ```
+2. Trigger the pipeline and monitor each stage.
+3. Verify the deployment in AKS:
+   ```bash
+   kubectl get pods
+   kubectl get services
+   ```
+4. **Validation**: Screenshots of pipeline execution and deployed application.
+
+---
+
+## Task 4: Deploying to AKS with Argo CD
 
 ### Objective
 Deploy applications to AKS using Argo CD for continuous delivery.
@@ -185,4 +192,4 @@ Deploy applications to AKS using Argo CD for continuous delivery.
 ---
 
 ## Conclusion
-This project integrates multiple tools and technologies, including Docker, Terraform, Jenkins, Ansible, and Argo CD, to create a comprehensive DevOps pipeline. Each task ensures automation, scalability, and reliability for modern application development and deployment.
+This project integrates multiple tools and technologies, including Terraform, Ansible, Jenkins, and Argo CD, to create a comprehensive DevOps pipeline. Each task ensures automation, scalability, and reliability for modern application development and deployment.
